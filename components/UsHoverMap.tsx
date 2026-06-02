@@ -10,7 +10,7 @@ const US_TOPOJSON_URL =
 type UsTopology = Topology<{ states: GeometryCollection }>;
 
 // On hover, a state is highlighted and scaled up slightly without shifting others.
-export const UsHoverRotateMap = () => {
+export const UsHoverMap = () => {
   const width = 960;
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
 
