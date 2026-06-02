@@ -7,9 +7,10 @@ Learning D3 as a visualization tool for maps
 - [D3](https://d3js.org) - for this project, it served as the map visualization tool
 - [Versor](https://www.npmjs.com/package/versor) - map rotation tool
 - [TopoJSON Client](https://www.npmjs.com/package/topojson-client) - uses topology data to create drawable/interactable map features, such as per-country GeoJSON rendering and animation features
-- [World Atlas TopoJSON package](https://www.npmjs.com/package/world-atlas) - map data source
+- [World Atlas TopoJSON](https://www.npmjs.com/package/world-atlas) - world map data source
+- [US Atlas TopoJSON](https://www.npmjs.com/package/@d3ts/us-atlas) - US map data source
 - [Nextjs](https://nextjs.org) - frontend framework
-- GitHub Copilot
+- GitHub Copilot - aid in learning about new tools
 
 ## Credits
 
