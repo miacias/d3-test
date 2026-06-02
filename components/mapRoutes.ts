@@ -28,7 +28,7 @@ export const MAP_ROUTES: MapRoute[] = [
     description: "Natural Earth world map with graticules on a fixed canvas.",
   },
   {
-    href: "/maps/hover-rotate",
+    href: "/maps/hover",
     label: "Hover Map",
     description:
       "Albers USA projection of the US that highlights states on hover, implemented with D3's geoAlbersUsa and geoPath.",
