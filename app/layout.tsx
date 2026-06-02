@@ -15,7 +15,7 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: "D3 Test",
-  description: "Testbed for D3 map visualizations in a Next.js app, featuring various interactive world maps rendered on canvas.",
+  description: "Testing D3 map visualizations in a Next.js app, featuring various interactive world maps rendered on canvas.",
 };
 
 export default function RootLayout({
