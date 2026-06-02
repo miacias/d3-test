@@ -1,36 +1,25 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# D3 Test
 
-## Getting Started
+Learning D3 as a visualization tool for maps
 
-First, run the development server:
+## Tools & Tech
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+- [D3](https://d3js.org) - for this project, it served as the map visualization tool
+- [Versor](https://www.npmjs.com/package/versor) - map rotation tool
+- [TopoJSON Client](https://www.npmjs.com/package/topojson-client) - uses topology data to create drawable/interactable map features, such as per-country GeoJSON rendering and animation features
+- [World Atlas TopoJSON package](https://www.npmjs.com/package/world-atlas) - map data source
+- [Nextjs](https://nextjs.org) - frontend framework
+- GitHub Copilot
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Credits
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### Maps
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+- [Jason Davies map rotations](https://www.jasondavies.com/maps/rotate)
+- [Jason Davies map animation](https://www.jasondavies.com/maps/zoom)
+- [D3 versor dragging map demos](https://observablehq.com/@d3/versor-dragging)
+- [Mike Bostock Keynote Presentation on D3 maps ~20:00-40:00](https://vimeo.com/106198518)
 
-## Learn More
+### Unused Resources
 
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- [Natural Earth 1:110m cultural vector maps](https://www.naturalearthdata.com/downloads/110m-cultural-vectors)
