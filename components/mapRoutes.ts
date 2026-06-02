@@ -33,4 +33,10 @@ export const MAP_ROUTES: MapRoute[] = [
     description:
       "Albers USA projection of the US that highlights states on hover, implemented with D3's geoAlbersUsa and geoPath.",
   },
+  {
+    href: "/maps/rotate",
+    label: "Rotate Map",
+    description:
+      "Albers USA projection of the US that rotates states on click, implemented with D3's geoAlbersUsa and geoPath.",
+  }
 ];
