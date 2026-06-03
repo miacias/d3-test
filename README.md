@@ -24,3 +24,7 @@ Learning D3 as a visualization tool for maps
 ### Unused Resources
 
 - [Natural Earth 1:110m cultural vector maps](https://www.naturalearthdata.com/downloads/110m-cultural-vectors)
+
+## License
+
+All Data and Lib directory files are proprietary to T3RIDOX Productions LLC and are not for reuse, distribution, or adaptation.
