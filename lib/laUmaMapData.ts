@@ -69,6 +69,7 @@ type CountryShape = {
   type: string;
   cellCount: number;
   paths: string[];
+  outlinePaths: string[];
 };
 
 export type LaUmaMapViewModel = {
@@ -162,6 +163,99 @@ const buildViewModel = (mapData: LaUmaRawData): LaUmaMapViewModel => {
     .map((state) => {
       const cellIds = cellIdsByStateId.get(state.i) ?? [];
       const stateName = state.name?.trim() || `State ${state.i}`;
+      const edgeCounts = new Map<string, number>();
+      const edgeVertices = new Map<string, [number, number]>();
+
+      cellIds.forEach((cellId) => {
+        const cell = cellById.get(cellId);
+        if (!cell || cell.v.length < 2) {
+          return;
+        }
+
+        for (let index = 0; index < cell.v.length; index += 1) {
+          const a = cell.v[index];
+          const b = cell.v[(index + 1) % cell.v.length];
+
+          if (a < 0 || b < 0) {
+            continue;
+          }
+
+          const edgeKey = a < b ? `${a}:${b}` : `${b}:${a}`;
+          edgeCounts.set(edgeKey, (edgeCounts.get(edgeKey) ?? 0) + 1);
+
+          if (!edgeVertices.has(edgeKey)) {
+            edgeVertices.set(edgeKey, [a, b]);
+          }
+        }
+      });
+
+      const boundaryEdges = [...edgeCounts.entries()]
+        .filter(([, count]) => count === 1)
+        .map(([edgeKey]) => edgeVertices.get(edgeKey))
+        .filter((edge): edge is [number, number] => Boolean(edge));
+
+      const adjacency = new Map<number, number[]>();
+      boundaryEdges.forEach(([a, b]) => {
+        const aNeighbors = adjacency.get(a) ?? [];
+        aNeighbors.push(b);
+        adjacency.set(a, aNeighbors);
+
+        const bNeighbors = adjacency.get(b) ?? [];
+        bNeighbors.push(a);
+        adjacency.set(b, bNeighbors);
+      });
+
+      const toEdgeKey = (a: number, b: number) => (a < b ? `${a}:${b}` : `${b}:${a}`);
+      const remainingEdges = new Set(boundaryEdges.map(([a, b]) => toEdgeKey(a, b)));
+      const boundaryLoops: number[][] = [];
+
+      while (remainingEdges.size > 0) {
+        const [seedEdgeKey] = remainingEdges;
+        if (!seedEdgeKey) {
+          break;
+        }
+
+        const seedEdge = edgeVertices.get(seedEdgeKey);
+        if (!seedEdge) {
+          remainingEdges.delete(seedEdgeKey);
+          continue;
+        }
+
+        const [start, next] = seedEdge;
+        const loop: number[] = [start, next];
+        let previous = start;
+        let current = next;
+        remainingEdges.delete(seedEdgeKey);
+
+        while (current !== start) {
+          const neighbors = adjacency.get(current) ?? [];
+          const candidate =
+            neighbors.find((neighbor) => neighbor !== previous && remainingEdges.has(toEdgeKey(current, neighbor))) ??
+            neighbors.find((neighbor) => remainingEdges.has(toEdgeKey(current, neighbor)));
+
+          if (typeof candidate !== "number") {
+            break;
+          }
+
+          const candidateEdgeKey = toEdgeKey(current, candidate);
+          remainingEdges.delete(candidateEdgeKey);
+          previous = current;
+          current = candidate;
+          loop.push(current);
+
+          if (loop.length > boundaryEdges.length + 1) {
+            break;
+          }
+        }
+
+        if (loop.length >= 4 && loop[0] === loop[loop.length - 1]) {
+          boundaryLoops.push(loop.slice(0, -1));
+        }
+      }
+
+      const outlinePaths = boundaryLoops
+        .map((vertexLoop) => toPath(vertexLoop))
+        .filter((cellPath): cellPath is string => Boolean(cellPath));
 
       return {
         id: state.i,
@@ -174,6 +268,7 @@ const buildViewModel = (mapData: LaUmaRawData): LaUmaMapViewModel => {
             return cell ? toPath(cell.v) : null;
           })
           .filter((cellPath): cellPath is string => Boolean(cellPath)),
+        outlinePaths,
       };
     })
     .filter((state): state is CountryShape => state.paths.length > 0);

@@ -8,13 +8,14 @@ type CountryShape = {
   type: string;
   cellCount: number;
   paths: string[];
+  outlinePaths: string[];
 };
 
 type LaUmaMapProps = {
   mapData: LaUmaMapViewModel;
 };
 
-export const LaUmaStateMap = ({ mapData }: LaUmaMapProps) => {
+export const LaUmaModifiedStateMap = ({ mapData }: LaUmaMapProps) => {
   const [hoveredCountryId, setHoveredCountryId] = useState<number | null>(null);
   const hoveredCountry =
     hoveredCountryId === null ? null : mapData.countryShapes.find((country) => country.id === hoveredCountryId) ?? null;
@@ -71,10 +72,20 @@ export const LaUmaStateMap = ({ mapData }: LaUmaMapProps) => {
                     d={path}
                     fill={isHovered ? "#22d3ee" : "rgba(34, 211, 238, 0.02)"}
                     fillOpacity={isHovered ? 0.45 : 1}
-                    stroke={isHovered ? "#67e8f9" : "rgba(255, 255, 255, 0.2)"}
-                    strokeWidth={isHovered ? 1.8 : 0.9}
+                    stroke="none"
+                    style={{ transition: "fill 120ms ease" }}
+                  />
+                ))}
+
+                {country.outlinePaths.map((path, index) => (
+                  <path
+                    key={`country-${country.id}-outline-${index}`}
+                    d={path}
+                    fill="none"
+                    stroke={isHovered ? "#67e8f9" : "rgba(255, 255, 255, 0.32)"}
+                    strokeWidth={isHovered ? 2 : 1.1}
                     vectorEffect="non-scaling-stroke"
-                    style={{ transition: "fill 120ms ease, stroke 120ms ease, stroke-width 120ms ease" }}
+                    style={{ transition: "stroke 120ms ease, stroke-width 120ms ease" }}
                   />
                 ))}
               </g>
