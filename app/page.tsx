@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { MAP_ROUTES } from "../components/mapRoutes";
+import { PRIVATE_MAP_ROUTES } from "../components/privateMapRoutes";
 
 export default function Home() {
   return (
@@ -14,6 +15,18 @@ export default function Home() {
 
       <section className="grid gap-4 sm:grid-cols-2">
         {MAP_ROUTES.map((route) => (
+          <article key={route.href} className="rounded-xl border border-zinc-200 bg-white p-4 shadow-sm">
+            <h2 className="text-xl font-semibold text-teal-500">{route.label}</h2>
+            <p className="mt-1 text-sm text-zinc-600">{route.description}</p>
+            <Link
+              href={route.href}
+              className="mt-4 inline-flex rounded-md border border-zinc-300 px-3 py-1.5 text-sm font-medium text-zinc-900 transition hover:bg-zinc-100"
+            >
+              Open page
+            </Link>
+          </article>
+        ))}
+        {PRIVATE_MAP_ROUTES.map((route) => (
           <article key={route.href} className="rounded-xl border border-zinc-200 bg-white p-4 shadow-sm">
             <h2 className="text-xl font-semibold text-teal-500">{route.label}</h2>
             <p className="mt-1 text-sm text-zinc-600">{route.description}</p>
