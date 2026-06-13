@@ -1,4 +1,4 @@
-import { readFile } from "node:fs/promises";
+// import { readFile } from "node:fs/promises";
 import path from "node:path";
 import * as d3 from "d3";
 
@@ -81,7 +81,8 @@ export type LaUmaMapViewModel = {
   countryShapes: CountryShape[];
 };
 
-const SOURCE_FILE = path.join(process.cwd(), "data", "La Uma Full 2026-06-03-02-24.json");
+// const SOURCE_FILE = path.join(process.cwd(), "data", "La Uma Full 2026-06-03-02-24.json");
+const SOURCE_URL = process.env.LA_UMA_BLOB_URL;
 const VIEW_WIDTH = 960;
 const PADDING = 24;
 
@@ -89,26 +90,44 @@ let cachedMapData: LaUmaMapViewModel | null = null;
 
 const sanitizeLoneSurrogates = (jsonText: string) =>
   jsonText
-    .replace(/\\u(d[89ab][0-9a-f]{2})(?!\\u[dD][c-fC-F][0-9a-f]{2})/gi, "\\uFFFD")
-    .replace(/(?<!\\u[dD][89abAB][0-9a-f]{2})\\u(d[c-f][0-9a-f]{2})/gi, "\\uFFFD");
+    .replace(
+      /\\u(d[89ab][0-9a-f]{2})(?!\\u[dD][c-fC-F][0-9a-f]{2})/gi,
+      "\\uFFFD",
+    )
+    .replace(
+      /(?<!\\u[dD][89abAB][0-9a-f]{2})\\u(d[c-f][0-9a-f]{2})/gi,
+      "\\uFFFD",
+    );
 
 const buildViewModel = (mapData: LaUmaRawData): LaUmaMapViewModel => {
-  const viewHeight = Math.round((mapData.info.height / mapData.info.width) * VIEW_WIDTH);
-  const xScale = d3.scaleLinear([0, mapData.info.width], [PADDING, VIEW_WIDTH - PADDING]);
-  const yScale = d3.scaleLinear([0, mapData.info.height], [PADDING, viewHeight - PADDING]);
+  const viewHeight = Math.round(
+    (mapData.info.height / mapData.info.width) * VIEW_WIDTH,
+  );
+  const xScale = d3.scaleLinear(
+    [0, mapData.info.width],
+    [PADDING, VIEW_WIDTH - PADDING],
+  );
+  const yScale = d3.scaleLinear(
+    [0, mapData.info.height],
+    [PADDING, viewHeight - PADDING],
+  );
   const line = d3
     .line<Point>()
     .x(([x]) => xScale(x))
     .y(([, y]) => yScale(y))
     .curve(d3.curveLinearClosed);
 
-  const vertexById = new Map(mapData.pack.vertices.map((vertex) => [vertex.i, vertex]));
+  const vertexById = new Map(
+    mapData.pack.vertices.map((vertex) => [vertex.i, vertex]),
+  );
   const cellById = new Map(mapData.pack.cells.map((cell) => [cell.i, cell]));
 
   const toPath = (vertexIds: number[]) => {
     const points = vertexIds
       .map((vertexId) => vertexById.get(vertexId)?.p)
-      .filter((point): point is Point => Array.isArray(point) && point.length === 2);
+      .filter(
+        (point): point is Point => Array.isArray(point) && point.length === 2,
+      );
 
     if (points.length < 3) {
       return null;
@@ -118,7 +137,9 @@ const buildViewModel = (mapData: LaUmaRawData): LaUmaMapViewModel => {
   };
 
   const terrainPaths = mapData.pack.features
-    .filter((feature): feature is MapFeature => Boolean(feature && feature.vertices?.length))
+    .filter((feature): feature is MapFeature =>
+      Boolean(feature && feature.vertices?.length),
+    )
     .map((feature) => ({
       id: feature.i,
       land: feature.land,
@@ -158,7 +179,9 @@ const buildViewModel = (mapData: LaUmaRawData): LaUmaMapViewModel => {
   });
 
   const countryShapes = mapData.pack.states
-    .filter((state): state is State => Boolean(state && typeof state.i === "number"))
+    .filter((state): state is State =>
+      Boolean(state && typeof state.i === "number"),
+    )
     .filter((state) => !state.removed && state.i > 0)
     .map((state) => {
       const cellIds = cellIdsByStateId.get(state.i) ?? [];
@@ -205,8 +228,11 @@ const buildViewModel = (mapData: LaUmaRawData): LaUmaMapViewModel => {
         adjacency.set(b, bNeighbors);
       });
 
-      const toEdgeKey = (a: number, b: number) => (a < b ? `${a}:${b}` : `${b}:${a}`);
-      const remainingEdges = new Set(boundaryEdges.map(([a, b]) => toEdgeKey(a, b)));
+      const toEdgeKey = (a: number, b: number) =>
+        a < b ? `${a}:${b}` : `${b}:${a}`;
+      const remainingEdges = new Set(
+        boundaryEdges.map(([a, b]) => toEdgeKey(a, b)),
+      );
       const boundaryLoops: number[][] = [];
 
       while (remainingEdges.size > 0) {
@@ -230,8 +256,14 @@ const buildViewModel = (mapData: LaUmaRawData): LaUmaMapViewModel => {
         while (current !== start) {
           const neighbors = adjacency.get(current) ?? [];
           const candidate =
-            neighbors.find((neighbor) => neighbor !== previous && remainingEdges.has(toEdgeKey(current, neighbor))) ??
-            neighbors.find((neighbor) => remainingEdges.has(toEdgeKey(current, neighbor)));
+            neighbors.find(
+              (neighbor) =>
+                neighbor !== previous &&
+                remainingEdges.has(toEdgeKey(current, neighbor)),
+            ) ??
+            neighbors.find((neighbor) =>
+              remainingEdges.has(toEdgeKey(current, neighbor)),
+            );
 
           if (typeof candidate !== "number") {
             break;
@@ -284,11 +316,26 @@ const buildViewModel = (mapData: LaUmaRawData): LaUmaMapViewModel => {
 };
 
 export const getLaUmaMapData = async () => {
-  if (cachedMapData) {
-    return cachedMapData;
+  if (cachedMapData) return cachedMapData;
+
+  if (!SOURCE_URL) {
+    throw new Error("Missing LA_UMA_BLOB_URL environment variable.");
   }
 
-  const rawText = await readFile(SOURCE_FILE, "utf8");
+  // const rawText = await fetch(SOURCE_FILE, "utf8");
+  // const mapData = JSON.parse(sanitizeLoneSurrogates(rawText)) as LaUmaRawData;
+
+  // cachedMapData = buildViewModel(mapData);
+  // return cachedMapData;
+  const response = await fetch(SOURCE_URL, {
+    cache: "no-store",
+  });
+
+  if (!response.ok) {
+    throw new Error("Failed to load LA UMA blob data.");
+  }
+
+  const rawText = await response.text();
   const mapData = JSON.parse(sanitizeLoneSurrogates(rawText)) as LaUmaRawData;
 
   cachedMapData = buildViewModel(mapData);
